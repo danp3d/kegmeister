@@ -16,6 +16,7 @@ class Config {
     this._useDb = this._useDb.bind(this);
     this.migrate = this.migrate.bind(this);
     this.refreshConfig = this.refreshConfig.bind(this);
+    this.saveConfig = this.saveConfig.bind(this);
   }
 
   initialize() {
@@ -56,6 +57,14 @@ class Config {
       return config;
     }).finally(() => {
       setTimeout(this.refreshConfig, this.opts.refreshEvery);
+    });
+  }
+
+  saveConfig(cfg) {
+    return this._useDb((db) => {
+      return Promise.mapSeries(Object.keys(cfg), (key) => {
+        return db.run(`UPDATE configs SET ${key} = '${cfg[key]}'`);
+      });
     });
   }
   
